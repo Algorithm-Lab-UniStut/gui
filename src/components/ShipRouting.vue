@@ -1,6 +1,10 @@
 <template>
     <v-container>
-        <div id="cesiumContainer"></div>
+        <div>
+            <v-switch v-model="cesiumSwitch" label="Cesium"></v-switch>
+        </div>
+        <div id="leafletMap" v-if="true"></div>
+        <div id="cesiumContainer" v-if="cesiumSwitch"></div>
         <div>
             <v-banner>
                 <v-icon color="blue darken-2" small>mdi-map-marker</v-icon
@@ -38,7 +42,7 @@
 </template>
 
 <script>
-/* global Cesium */
+/* global Cesium, L */
 /* es-lint no-undef: "error" */
 import axios from "axios";
 
@@ -53,6 +57,14 @@ export default {
         cesiumRhumbLine: null,
         cesiumOriginMarker: null,
         cesiumDestinationMarker: null,
+        cesiumSwitch: true,
+        leaflet: {
+            map: null,
+            originMarker: L.marker(),
+            destinationMarker: L.marker(),
+            setOrigin: 1,
+            path: null,
+        },
     }),
     computed: {
         origin() {
@@ -78,6 +90,7 @@ export default {
     },
     mounted() {
         this.setupCesium();
+        this.setupLeaflet();
     },
     methods: {
         async computeRoute() {
@@ -106,6 +119,7 @@ export default {
                     clampToGround: true,
                 },
             });
+            this.drawLeafletLine([this.origin, this.destination]);
             try {
                 const { data } = await axios.post(
                     "http://localhost:8081/routes",
@@ -225,12 +239,72 @@ export default {
                 });
             }, Cesium.ScreenSpaceEventType.RIGHT_CLICK);
         },
+        drawCesiumLine(waypoints, type, name, color, width) {
+            const path = this.viewer.entities.add({
+                name: name,
+                polyline: {
+                    positions: Cesium.Cartesian3.fromDegreesArray(waypoints),
+                    width: width,
+                    material: color,
+                    arcType: type,
+                    clampToGround: true,
+                },
+            });
+            return path;
+        },
+        setupLeaflet() {
+            this.leaflet.map = L.map("leafletMap").setView([0, 0], 1);
+            const accessToken =
+                "pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw";
+            L.tileLayer(
+                `https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=${accessToken}`,
+                {
+                    maxZoom: 18,
+                    attribution:
+                        'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, ' +
+                        'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+                    id: "mapbox/streets-v11",
+                    tileSize: 512,
+                    zoomOffset: -1,
+                }
+            ).addTo(this.leaflet.map);
+            this.leaflet.map.on("click", this.onLeafletMapClick);
+        },
+        onLeafletMapClick(e) {
+            let location =
+                this.leaflet.setOrigin == 1
+                    ? this.leaflet.originMarker
+                    : this.leaflet.destinationMarker;
+            let icon =
+                this.leaflet.setOrigin == 1
+                    ? L.icon({
+                          iconUrl: require("@/assets/blue-marker.png"),
+                      })
+                    : L.icon({
+                          iconUrl: require("@/assets/red-marker.png"),
+                      });
+            this.leaflet.setOrigin = (this.leaflet.setOrigin + 1) % 2;
+            console.log("Clicked", e);
+            location.setLatLng(e.latlng).addTo(this.leaflet.map);
+            location.dragging.enable();
+            location.setIcon(icon);
+        },
+        drawLeafletLine(waypoints) {
+            this.leaflet.path?.remove();
+            this.leaflet.path = new L.Polyline(waypoints, {
+                color: "red",
+                weight: 3,
+                opacity: 0.5,
+                smoothFactor: 1,
+            });
+            this.leaflet.path.addTo(this.leaflet.map);
+        },
     },
 };
 </script>
 
 <style scoped>
-#map {
+#leafletMap {
     width: 600px;
     height: 500px;
 }
