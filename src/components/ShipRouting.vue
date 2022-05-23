@@ -222,9 +222,11 @@ export default {
                         },
                     })
                 );
-                this.path.waypoints = data.path.waypoints;
-                this.path.length = data.path.length;
                 console.log(data);
+                if (data.reachable) {
+                    this.path.waypoints = data.path.waypoints;
+                    this.path.length = data.path.length;
+                }
             } catch (e) {
                 console.error(e);
             } finally {
