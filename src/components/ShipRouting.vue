@@ -270,7 +270,8 @@ export default {
                         this.leaflet.path,
                         this.path.waypoints.map((w) => {
                             return { lat: w.lat, lng: w.lon };
-                        })
+                        }),
+                        "white"
                     );
                 }
                 this.navigating = false;
@@ -286,11 +287,15 @@ export default {
             Cesium.Camera.DEFAULT_VIEW_FACTOR = 3;
 
             // Initialize the Cesium Viewer in the HTML element with the "cesiumContainer" ID.
+            let imageryProvider = new Cesium.ArcGisMapServerImageryProvider({
+                url: "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer",
+            });
+            imageryProvider = Cesium.createWorldImagery({
+                style: Cesium.IonWorldImageryStyle.AERIAL_WITH_LABELS,
+            });
             this.cesium.viewer = new Cesium.Viewer("cesiumContainer", {
                 //terrainProvider: Cesium.createWorldTerrain(),
-                imageryProvider: Cesium.createWorldImagery({
-                    style: Cesium.IonWorldImageryStyle.AERIAL_WITH_LABELS,
-                }),
+                imageryProvider,
                 selectionIndicator: false,
                 infoBox: false,
                 animation: false,
