@@ -58,6 +58,7 @@ export default {
             map: null,
             originMarker: L.marker(),
             destinationMarker: L.marker(),
+            directPath: null,
             path: null,
         },
         cesium: {
@@ -124,8 +125,23 @@ export default {
                     this.leafletPlaceDestinationMarker({ lat, lng });
                 }
 
-                const directPath = [this.origin, this.destination];
-                this.drawLeafletLine(directPath);
+                const directPath =
+                    this.origin && this.destination
+                        ? [this.origin, this.destination]
+                        : [];
+                this.leaflet.directPath = this.drawLeafletLine(
+                    this.leaflet.directPath,
+                    directPath
+                );
+                if (this.path.waypoints) {
+                    this.leaflet.path = this.drawLeafletLine(
+                        this.leaflet.path,
+                        this.path.waypoints.map((w) => {
+                            return { lat: w.lat, lng: w.lon };
+                        }),
+                        "white"
+                    );
+                }
             } else {
                 this.teardownLeaflet();
             }
@@ -148,9 +164,12 @@ export default {
                 }
 
                 const waypointsDegreesArray = this.path.waypoints
-                    .map((w) => [w.lon, w.lat])
-                    .flat();
-                const directPath = [this.origin, this.destination];
+                    ? this.path.waypoints.map((w) => [w.lon, w.lat]).flat()
+                    : [];
+                const directPath =
+                    this.origin && this.destination
+                        ? [this.origin, this.destination]
+                        : [];
                 const directPathDegreesArray = directPath
                     .map((w) => [w.lng, w.lat])
                     .flat();
@@ -243,7 +262,16 @@ export default {
                     );
                 }
                 if (this.leafletSwitch) {
-                    this.drawLeafletLine(directPath);
+                    this.leaflet.directPath = this.drawLeafletLine(
+                        this.leaflet.directPath,
+                        directPath
+                    );
+                    this.leaflet.path = this.drawLeafletLine(
+                        this.leaflet.path,
+                        this.path.waypoints.map((w) => {
+                            return { lat: w.lat, lng: w.lon };
+                        })
+                    );
                 }
                 this.navigating = false;
             }
@@ -425,15 +453,16 @@ export default {
                 latlng
             );
         },
-        drawLeafletLine(waypoints) {
-            this.leaflet.path?.remove();
-            this.leaflet.path = new L.Polyline(waypoints, {
-                color: "red",
+        drawLeafletLine(path, waypoints, color = "red") {
+            path?.remove();
+            path = new L.Polyline(waypoints, {
+                color,
                 weight: 3,
                 opacity: 0.5,
                 smoothFactor: 1,
             });
-            this.leaflet.path.addTo(this.leaflet.map);
+            path.addTo(this.leaflet.map);
+            return path;
         },
         placeLeafletMarker(marker, iconUrl, latlng) {
             marker.setLatLng(latlng).addTo(this.leaflet.map);
