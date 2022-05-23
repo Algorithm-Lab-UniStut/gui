@@ -53,20 +53,19 @@ export default {
         path: { waypoints: null, length: 0 },
         navigating: false,
         cesiumSwitch: true,
-        leafletSwitch: true,
+        leafletSwitch: false,
         leaflet: {
             map: null,
             originMarker: L.marker(),
             destinationMarker: L.marker(),
-            setOrigin: 1,
             path: null,
         },
         cesium: {
             viewer: null,
-            greatCircleLine: null,
-            rhumbLine: null,
             originMarker: null,
             destinationMarker: null,
+            greatCircleLine: null,
+            rhumbLine: null,
             path: null,
         },
     }),
@@ -330,31 +329,32 @@ export default {
             ).addTo(this.leaflet.map);
             this.leaflet.originMarker = L.marker();
             this.leaflet.destinationMarker = L.marker();
-            this.setOrigin = 1;
-            this.leaflet.map.on("click", this.onLeafletMapClick);
+            // left click: place origin marker
+            this.leaflet.map.on("click", (e) =>
+                this.leafletPlaceOriginMarker(e.latlng)
+            );
+            // abuse the contextmenu (right click) for placing destination
+            this.leaflet.map.on("contextmenu", (e) => {
+                this.leafletPlaceDestinationMarker(e.latlng);
+            });
         },
         teardownLeaflet() {
             this.leaflet.map.off();
             this.leaflet.map.remove();
         },
-        onLeafletMapClick(e) {
-            let location =
-                this.leaflet.setOrigin == 1
-                    ? this.leaflet.originMarker
-                    : this.leaflet.destinationMarker;
-            let icon =
-                this.leaflet.setOrigin == 1
-                    ? L.icon({
-                          iconUrl: require("@/assets/blue-marker.png"),
-                      })
-                    : L.icon({
-                          iconUrl: require("@/assets/red-marker.png"),
-                      });
-            this.leaflet.setOrigin = (this.leaflet.setOrigin + 1) % 2;
-            console.log("Clicked", e);
-            location.setLatLng(e.latlng).addTo(this.leaflet.map);
-            location.dragging.enable();
-            location.setIcon(icon);
+        leafletPlaceOriginMarker(latlng) {
+            this.placeLeafletMarker(
+                this.leaflet.originMarker,
+                require("@/assets/blue-marker.png"),
+                latlng
+            );
+        },
+        leafletPlaceDestinationMarker(latlng) {
+            this.placeLeafletMarker(
+                this.leaflet.destinationMarker,
+                require("@/assets/red-marker.png"),
+                latlng
+            );
         },
         drawLeafletLine(waypoints) {
             this.leaflet.path?.remove();
@@ -365,6 +365,11 @@ export default {
                 smoothFactor: 1,
             });
             this.leaflet.path.addTo(this.leaflet.map);
+        },
+        placeLeafletMarker(marker, iconUrl, latlng) {
+            marker.setLatLng(latlng).addTo(this.leaflet.map);
+            marker.dragging.enable();
+            marker.setIcon(L.icon({ iconUrl }));
         },
     },
 };
