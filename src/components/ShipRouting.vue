@@ -98,56 +98,27 @@ export default {
             if (this.leafletSwitch) {
                 await this.$nextTick();
                 this.setupLeaflet();
-                this.leaflet.originMarker = L.marker();
-                this.leaflet.destinationMarker = L.marker();
-                this.setOrigin = 1;
             } else {
-                this.leaflet.map.off();
-                this.leaflet.map.remove();
+                this.teardownLeaflet();
             }
         },
         async cesiumSwitch() {
             this.leafletSwitch = !this.cesiumSwitch;
-            await this.$nextTick();
             if (this.cesiumSwitch) {
+                await this.$nextTick();
                 this.setupCesium();
             } else {
-                this.cesium.viewer.destroy();
+                this.teardownCesium();
             }
         },
     },
     mounted() {
-        this.setupCesium();
-        this.setupLeaflet();
+        if (this.cesiumSwitch) this.setupCesium();
+        if (this.leafletSwitch) this.setupLeaflet();
     },
     methods: {
         async computeRoute() {
             this.navigating = true;
-            const waypoints = [this.origin, this.destination];
-            const degreesArray = waypoints.map((w) => [w.lng, w.lat]).flat();
-            this.cesium.viewer.entities.remove(this.cesium.rhumbLine);
-            this.cesium.viewer.entities.remove(this.cesium.path);
-            this.cesium.viewer.entities.remove(this.cesium.greatCircleLine);
-            this.cesium.rhumbLine = this.cesium.viewer.entities.add({
-                name: "Green rhumb line on terrain",
-                polyline: {
-                    positions: Cesium.Cartesian3.fromDegreesArray(degreesArray),
-                    width: 3,
-                    material: Cesium.Color.GREEN,
-                    arcType: Cesium.ArcType.RHUMB,
-                    clampToGround: true,
-                },
-            });
-            this.cesium.greatCircleLine = this.cesium.viewer.entities.add({
-                name: "Red line on terrain",
-                polyline: {
-                    positions: Cesium.Cartesian3.fromDegreesArray(degreesArray),
-                    width: 3,
-                    material: Cesium.Color.RED,
-                    clampToGround: true,
-                },
-            });
-            this.drawLeafletLine([this.origin, this.destination]);
             try {
                 const { data } = await axios.post(
                     "http://localhost:8081/routes",
@@ -162,24 +133,66 @@ export default {
                 const waypoints = data.path.waypoints;
                 this.path.waypoints = waypoints;
                 this.path.length = data.path.length;
-                const degreesArray = waypoints
+                const waypointsDegreesArray = waypoints
                     .map((w) => [w.lon, w.lat])
                     .flat();
-                this.cesium.path = this.cesium.viewer.entities.add({
-                    name: "Ship route",
-                    polyline: {
-                        positions:
-                            Cesium.Cartesian3.fromDegreesArray(degreesArray),
-                        width: 3,
-                        material: Cesium.Color.WHITE,
-                        clampToGround: true,
-                    },
-                });
+                if (this.cesiumSwitch) {
+                    this.cesium.viewer.entities.remove(this.cesium.path);
+                    this.cesium.path = this.cesium.viewer.entities.add({
+                        name: "Ship route",
+                        polyline: {
+                            positions: Cesium.Cartesian3.fromDegreesArray(
+                                waypointsDegreesArray
+                            ),
+                            width: 3,
+                            material: Cesium.Color.WHITE,
+                            clampToGround: true,
+                        },
+                    });
+                }
                 console.log(data);
             } catch (e) {
                 console.error(e);
+            } finally {
+                const directPath = [this.origin, this.destination];
+                const directPathDegreesArray = directPath
+                    .map((w) => [w.lng, w.lat])
+                    .flat();
+                if (this.cesiumSwitch) {
+                    this.cesium.viewer.entities.remove(this.cesium.rhumbLine);
+                    this.cesium.viewer.entities.remove(
+                        this.cesium.greatCircleLine
+                    );
+                    this.cesium.rhumbLine = this.cesium.viewer.entities.add({
+                        name: "Green rhumb line on terrain",
+                        polyline: {
+                            positions: Cesium.Cartesian3.fromDegreesArray(
+                                directPathDegreesArray
+                            ),
+                            width: 3,
+                            material: Cesium.Color.GREEN,
+                            arcType: Cesium.ArcType.RHUMB,
+                            clampToGround: true,
+                        },
+                    });
+                    this.cesium.greatCircleLine =
+                        this.cesium.viewer.entities.add({
+                            name: "Red line on terrain",
+                            polyline: {
+                                positions: Cesium.Cartesian3.fromDegreesArray(
+                                    directPathDegreesArray
+                                ),
+                                width: 3,
+                                material: Cesium.Color.RED,
+                                clampToGround: true,
+                            },
+                        });
+                }
+                if (this.leafletSwitch) {
+                    this.drawLeafletLine(directPath);
+                }
+                this.navigating = false;
             }
-            this.navigating = false;
         },
         setupCesium() {
             Cesium.Ion.defaultAccessToken =
@@ -273,6 +286,9 @@ export default {
                 );
             }, Cesium.ScreenSpaceEventType.RIGHT_CLICK);
         },
+        teardownCesium() {
+            this.cesium.viewer.destroy();
+        },
         drawCesiumLine(waypoints, type, name, color, width) {
             const path = this.cesium.viewer.entities.add({
                 name: name,
@@ -302,7 +318,14 @@ export default {
                     zoomOffset: -1,
                 }
             ).addTo(this.leaflet.map);
+            this.leaflet.originMarker = L.marker();
+            this.leaflet.destinationMarker = L.marker();
+            this.setOrigin = 1;
             this.leaflet.map.on("click", this.onLeafletMapClick);
+        },
+        teardownLeaflet() {
+            this.leaflet.map.off();
+            this.leaflet.map.remove();
         },
         onLeafletMapClick(e) {
             let location =
