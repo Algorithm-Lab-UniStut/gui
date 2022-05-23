@@ -107,6 +107,22 @@ export default {
             if (this.leafletSwitch) {
                 await this.$nextTick();
                 this.setupLeaflet();
+                if (this.cesium.originMarker) {
+                    const cartographic = Cesium.Cartographic.fromCartesian(
+                        this.cesium.originMarker._position._value
+                    );
+                    const lat = Cesium.Math.toDegrees(cartographic.latitude);
+                    const lng = Cesium.Math.toDegrees(cartographic.longitude);
+                    this.leafletPlaceOriginMarker({ lat, lng });
+                }
+                if (this.cesium.destinationMarker) {
+                    const cartographic = Cesium.Cartographic.fromCartesian(
+                        this.cesium.destinationMarker._position._value
+                    );
+                    const lat = Cesium.Math.toDegrees(cartographic.latitude);
+                    const lng = Cesium.Math.toDegrees(cartographic.longitude);
+                    this.leafletPlaceDestinationMarker({ lat, lng });
+                }
             } else {
                 this.teardownLeaflet();
             }
@@ -116,6 +132,17 @@ export default {
             if (this.cesiumSwitch) {
                 await this.$nextTick();
                 this.setupCesium();
+                if (this.leaflet.originMarker._latlng) {
+                    this.cesiumPlaceOriginMarker(
+                        this.leaflet.originMarker._latlng
+                    );
+                }
+
+                if (this.leaflet.destinationMarker._latlng) {
+                    this.cesiumPlaceDestinationMarker(
+                        this.leaflet.destinationMarker._latlng
+                    );
+                }
             } else {
                 this.teardownCesium();
             }
@@ -297,6 +324,29 @@ export default {
         },
         teardownCesium() {
             this.cesium.viewer.destroy();
+        },
+        cesiumPlaceMarker(image, latlng) {
+            return this.cesium.viewer.entities.add({
+                position: Cesium.Cartesian3.fromDegrees(latlng.lng, latlng.lat),
+                billboard: {
+                    image,
+                    horizontalOrigin: Cesium.HorizontalOrigin.CENTER, // default
+                    verticalOrigin: Cesium.VerticalOrigin.BOTTOM, // default: CENTER
+                    scale: 0.3,
+                },
+            });
+        },
+        cesiumPlaceOriginMarker(latlng) {
+            this.cesium.originMarker = this.cesiumPlaceMarker(
+                require("@/assets/blue-marker.png"),
+                latlng
+            );
+        },
+        cesiumPlaceDestinationMarker(latlng) {
+            this.cesium.destinationMarker = this.cesiumPlaceMarker(
+                require("@/assets/red-marker.png"),
+                latlng
+            );
         },
         drawCesiumLine(waypoints, type, name, color, width) {
             const path = this.cesium.viewer.entities.add({
