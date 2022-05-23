@@ -52,12 +52,6 @@ export default {
     data: () => ({
         path: { waypoints: null, length: 0 },
         navigating: false,
-        viewer: null,
-        cesiumPath: null,
-        cesiumGreatCircle: null,
-        cesiumRhumbLine: null,
-        cesiumOriginMarker: null,
-        cesiumDestinationMarker: null,
         cesiumSwitch: true,
         leafletSwitch: true,
         leaflet: {
@@ -67,12 +61,20 @@ export default {
             setOrigin: 1,
             path: null,
         },
+        cesium: {
+            viewer: null,
+            greatCircleLine: null,
+            rhumbLine: null,
+            originMarker: null,
+            destinationMarker: null,
+            path: null,
+        },
     }),
     computed: {
         origin() {
-            if (!this.cesiumOriginMarker) return null;
+            if (!this.cesium.originMarker) return null;
             const cartographic = Cesium.Cartographic.fromCartesian(
-                this.cesiumOriginMarker._position._value
+                this.cesium.originMarker._position._value
             );
             return {
                 lat: Cesium.Math.toDegrees(cartographic.latitude),
@@ -80,9 +82,9 @@ export default {
             };
         },
         destination() {
-            if (!this.cesiumDestinationMarker) return null;
+            if (!this.cesium.destinationMarker) return null;
             const cartographic = Cesium.Cartographic.fromCartesian(
-                this.cesiumDestinationMarker._position._value
+                this.cesium.destinationMarker._position._value
             );
             return {
                 lat: Cesium.Math.toDegrees(cartographic.latitude),
@@ -110,7 +112,7 @@ export default {
             if (this.cesiumSwitch) {
                 this.setupCesium();
             } else {
-                this.viewer.destroy();
+                this.cesium.viewer.destroy();
             }
         },
     },
@@ -123,10 +125,10 @@ export default {
             this.navigating = true;
             const waypoints = [this.origin, this.destination];
             const degreesArray = waypoints.map((w) => [w.lng, w.lat]).flat();
-            this.viewer.entities.remove(this.cesiumRhumbLine);
-            this.viewer.entities.remove(this.cesiumPath);
-            this.viewer.entities.remove(this.cesiumGreatCircle);
-            this.cesiumRhumbLine = this.viewer.entities.add({
+            this.cesium.viewer.entities.remove(this.cesium.rhumbLine);
+            this.cesium.viewer.entities.remove(this.cesium.path);
+            this.cesium.viewer.entities.remove(this.cesium.greatCircleLine);
+            this.cesium.rhumbLine = this.cesium.viewer.entities.add({
                 name: "Green rhumb line on terrain",
                 polyline: {
                     positions: Cesium.Cartesian3.fromDegreesArray(degreesArray),
@@ -136,7 +138,7 @@ export default {
                     clampToGround: true,
                 },
             });
-            this.cesiumGreatCircle = this.viewer.entities.add({
+            this.cesium.greatCircleLine = this.cesium.viewer.entities.add({
                 name: "Red line on terrain",
                 polyline: {
                     positions: Cesium.Cartesian3.fromDegreesArray(degreesArray),
@@ -163,7 +165,7 @@ export default {
                 const degreesArray = waypoints
                     .map((w) => [w.lon, w.lat])
                     .flat();
-                this.cesiumPath = this.viewer.entities.add({
+                this.cesium.path = this.cesium.viewer.entities.add({
                     name: "Ship route",
                     polyline: {
                         positions:
@@ -189,7 +191,7 @@ export default {
             Cesium.Camera.DEFAULT_VIEW_FACTOR = 3;
 
             // Initialize the Cesium Viewer in the HTML element with the "cesiumContainer" ID.
-            this.viewer = new Cesium.Viewer("cesiumContainer", {
+            this.cesium.viewer = new Cesium.Viewer("cesiumContainer", {
                 //terrainProvider: Cesium.createWorldTerrain(),
                 imageryProvider: Cesium.createWorldImagery({
                     style: Cesium.IonWorldImageryStyle.AERIAL_WITH_LABELS,
@@ -206,16 +208,16 @@ export default {
                 //geocoder: false,
             });
 
-            const scene = this.viewer.scene;
+            const scene = this.cesium.viewer.scene;
             if (!scene.pickPositionSupported) {
                 window.alert("This browser does not support pickPosition.");
             }
             // Mouse over the globe to see the cartographic position
             const handler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
             handler.setInputAction((movement) => {
-                let position = this.viewer.scene.camera.pickEllipsoid(
+                let position = this.cesium.viewer.scene.camera.pickEllipsoid(
                     movement.position,
-                    this.viewer.scene.globe.ellipsoid
+                    this.cesium.viewer.scene.globe.ellipsoid
                 );
                 if (!position) {
                     console.log("Globe was not picked");
@@ -224,9 +226,11 @@ export default {
                 let cartographic = Cesium.Cartographic.fromCartesian(position);
                 let lat = Cesium.Math.toDegrees(cartographic.latitude);
                 let lng = Cesium.Math.toDegrees(cartographic.longitude);
-                if (this.cesiumOriginMarker)
-                    this.viewer.entities.remove(this.cesiumOriginMarker);
-                this.cesiumOriginMarker = this.viewer.entities.add({
+                if (this.cesium.originMarker)
+                    this.cesium.viewer.entities.remove(
+                        this.cesium.originMarker
+                    );
+                this.cesium.originMarker = this.cesium.viewer.entities.add({
                     position: Cesium.Cartesian3.fromDegrees(lng, lat),
                     billboard: {
                         image: require("@/assets/blue-marker.png"),
@@ -239,9 +243,9 @@ export default {
                 });
             }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
             handler.setInputAction((movement) => {
-                let position = this.viewer.scene.camera.pickEllipsoid(
+                let position = this.cesium.viewer.scene.camera.pickEllipsoid(
                     movement.position,
-                    this.viewer.scene.globe.ellipsoid
+                    this.cesium.viewer.scene.globe.ellipsoid
                 );
                 if (!position) {
                     console.log("Globe was not picked");
@@ -250,23 +254,27 @@ export default {
                 let cartographic = Cesium.Cartographic.fromCartesian(position);
                 let lat = Cesium.Math.toDegrees(cartographic.latitude);
                 let lng = Cesium.Math.toDegrees(cartographic.longitude);
-                if (this.cesiumDestinationMarker)
-                    this.viewer.entities.remove(this.cesiumDestinationMarker);
-                this.cesiumDestinationMarker = this.viewer.entities.add({
-                    position: Cesium.Cartesian3.fromDegrees(lng, lat),
-                    billboard: {
-                        image: require("@/assets/red-marker.png"),
-                        //pixelOffset: new Cesium.Cartesian2(0, -50), // default: (0, 0)
-                        horizontalOrigin: Cesium.HorizontalOrigin.CENTER, // default
-                        verticalOrigin: Cesium.VerticalOrigin.BOTTOM, // default: CENTER
-                        scale: 0.3,
-                        //disableDepthTestDistance: Number.POSITIVE_INFINITY, // necessary when using Cesium World Terrain because of rendering issues
-                    },
-                });
+                if (this.cesium.destinationMarker)
+                    this.cesium.viewer.entities.remove(
+                        this.cesium.destinationMarker
+                    );
+                this.cesium.destinationMarker = this.cesium.viewer.entities.add(
+                    {
+                        position: Cesium.Cartesian3.fromDegrees(lng, lat),
+                        billboard: {
+                            image: require("@/assets/red-marker.png"),
+                            //pixelOffset: new Cesium.Cartesian2(0, -50), // default: (0, 0)
+                            horizontalOrigin: Cesium.HorizontalOrigin.CENTER, // default
+                            verticalOrigin: Cesium.VerticalOrigin.BOTTOM, // default: CENTER
+                            scale: 0.3,
+                            //disableDepthTestDistance: Number.POSITIVE_INFINITY, // necessary when using Cesium World Terrain because of rendering issues
+                        },
+                    }
+                );
             }, Cesium.ScreenSpaceEventType.RIGHT_CLICK);
         },
         drawCesiumLine(waypoints, type, name, color, width) {
-            const path = this.viewer.entities.add({
+            const path = this.cesium.viewer.entities.add({
                 name: name,
                 polyline: {
                     positions: Cesium.Cartesian3.fromDegreesArray(waypoints),
@@ -279,11 +287,9 @@ export default {
             return path;
         },
         setupLeaflet() {
-            console.log(1);
             this.leaflet.map = L.map("leafletMap").setView([0, 0], 1);
             const accessToken =
                 "pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw";
-            console.log(2);
             L.tileLayer(
                 `https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=${accessToken}`,
                 {
