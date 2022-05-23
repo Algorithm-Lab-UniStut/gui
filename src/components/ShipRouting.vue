@@ -123,6 +123,9 @@ export default {
                     const lng = Cesium.Math.toDegrees(cartographic.longitude);
                     this.leafletPlaceDestinationMarker({ lat, lng });
                 }
+
+                const directPath = [this.origin, this.destination];
+                this.drawLeafletLine(directPath);
             } else {
                 this.teardownLeaflet();
             }
@@ -143,6 +146,38 @@ export default {
                         this.leaflet.destinationMarker._latlng
                     );
                 }
+
+                const waypointsDegreesArray = this.path.waypoints
+                    .map((w) => [w.lon, w.lat])
+                    .flat();
+                const directPath = [this.origin, this.destination];
+                const directPathDegreesArray = directPath
+                    .map((w) => [w.lng, w.lat])
+                    .flat();
+                this.cesium.path = this.drawCesiumLine(
+                    this.cesium.path,
+                    waypointsDegreesArray,
+                    Cesium.ArcType.GEODESIC,
+                    "Ship route",
+                    Cesium.Color.WHITE,
+                    3
+                );
+                this.cesium.rhumbLine = this.drawCesiumLine(
+                    this.cesium.rhumbLine,
+                    directPathDegreesArray,
+                    Cesium.ArcType.RHUMB,
+                    "Green rhumb line on terrain",
+                    Cesium.Color.GREEN,
+                    3
+                );
+                this.cesium.greatCircleLine = this.drawCesiumLine(
+                    this.cesium.greatCircleLine,
+                    directPathDegreesArray,
+                    Cesium.ArcType.GEODESIC,
+                    "Red line on terrain",
+                    Cesium.Color.RED,
+                    3
+                );
             } else {
                 this.teardownCesium();
             }
@@ -155,6 +190,8 @@ export default {
     methods: {
         async computeRoute() {
             this.navigating = true;
+            this.path.waypoints = [];
+            this.path.length = 0;
             try {
                 const { data } = await axios.post(
                     "http://localhost:8081/routes",
@@ -166,63 +203,44 @@ export default {
                         },
                     })
                 );
-                const waypoints = data.path.waypoints;
-                this.path.waypoints = waypoints;
+                this.path.waypoints = data.path.waypoints;
                 this.path.length = data.path.length;
-                const waypointsDegreesArray = waypoints
-                    .map((w) => [w.lon, w.lat])
-                    .flat();
-                if (this.cesiumSwitch) {
-                    this.cesium.viewer.entities.remove(this.cesium.path);
-                    this.cesium.path = this.cesium.viewer.entities.add({
-                        name: "Ship route",
-                        polyline: {
-                            positions: Cesium.Cartesian3.fromDegreesArray(
-                                waypointsDegreesArray
-                            ),
-                            width: 3,
-                            material: Cesium.Color.WHITE,
-                            clampToGround: true,
-                        },
-                    });
-                }
                 console.log(data);
             } catch (e) {
                 console.error(e);
             } finally {
+                const waypointsDegreesArray = this.path.waypoints
+                    .map((w) => [w.lon, w.lat])
+                    .flat();
                 const directPath = [this.origin, this.destination];
                 const directPathDegreesArray = directPath
                     .map((w) => [w.lng, w.lat])
                     .flat();
                 if (this.cesiumSwitch) {
-                    this.cesium.viewer.entities.remove(this.cesium.rhumbLine);
-                    this.cesium.viewer.entities.remove(
-                        this.cesium.greatCircleLine
+                    this.cesium.path = this.drawCesiumLine(
+                        this.cesium.path,
+                        waypointsDegreesArray,
+                        Cesium.ArcType.GEODESIC,
+                        "Ship route",
+                        Cesium.Color.WHITE,
+                        3
                     );
-                    this.cesium.rhumbLine = this.cesium.viewer.entities.add({
-                        name: "Green rhumb line on terrain",
-                        polyline: {
-                            positions: Cesium.Cartesian3.fromDegreesArray(
-                                directPathDegreesArray
-                            ),
-                            width: 3,
-                            material: Cesium.Color.GREEN,
-                            arcType: Cesium.ArcType.RHUMB,
-                            clampToGround: true,
-                        },
-                    });
-                    this.cesium.greatCircleLine =
-                        this.cesium.viewer.entities.add({
-                            name: "Red line on terrain",
-                            polyline: {
-                                positions: Cesium.Cartesian3.fromDegreesArray(
-                                    directPathDegreesArray
-                                ),
-                                width: 3,
-                                material: Cesium.Color.RED,
-                                clampToGround: true,
-                            },
-                        });
+                    this.cesium.rhumbLine = this.drawCesiumLine(
+                        this.cesium.rhumbLine,
+                        directPathDegreesArray,
+                        Cesium.ArcType.RHUMB,
+                        "Green rhumb line on terrain",
+                        Cesium.Color.GREEN,
+                        3
+                    );
+                    this.cesium.greatCircleLine = this.drawCesiumLine(
+                        this.cesium.greatCircleLine,
+                        directPathDegreesArray,
+                        Cesium.ArcType.GEODESIC,
+                        "Red line on terrain",
+                        Cesium.Color.RED,
+                        3
+                    );
                 }
                 if (this.leafletSwitch) {
                     this.drawLeafletLine(directPath);
@@ -348,7 +366,8 @@ export default {
                 latlng
             );
         },
-        drawCesiumLine(waypoints, type, name, color, width) {
+        drawCesiumLine(line, waypoints, type, name, color, width) {
+            this.cesium.viewer.entities.remove(line);
             const path = this.cesium.viewer.entities.add({
                 name: name,
                 polyline: {
