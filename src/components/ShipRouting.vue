@@ -1,9 +1,10 @@
 <template>
     <v-container>
         <div>
+            <v-switch v-model="leafletSwitch" label="Leaflet"></v-switch>
             <v-switch v-model="cesiumSwitch" label="Cesium"></v-switch>
         </div>
-        <div id="leafletMap" v-if="true"></div>
+        <div id="leafletMap" v-if="leafletSwitch"></div>
         <div id="cesiumContainer" v-if="cesiumSwitch"></div>
         <div>
             <v-banner>
@@ -58,6 +59,7 @@ export default {
         cesiumOriginMarker: null,
         cesiumDestinationMarker: null,
         cesiumSwitch: true,
+        leafletSwitch: true,
         leaflet: {
             map: null,
             originMarker: L.marker(),
@@ -86,6 +88,30 @@ export default {
                 lat: Cesium.Math.toDegrees(cartographic.latitude),
                 lng: Cesium.Math.toDegrees(cartographic.longitude),
             };
+        },
+    },
+    watch: {
+        async leafletSwitch() {
+            this.cesiumSwitch = !this.leafletSwitch;
+            if (this.leafletSwitch) {
+                await this.$nextTick();
+                this.setupLeaflet();
+                this.leaflet.originMarker = L.marker();
+                this.leaflet.destinationMarker = L.marker();
+                this.setOrigin = 1;
+            } else {
+                this.leaflet.map.off();
+                this.leaflet.map.remove();
+            }
+        },
+        async cesiumSwitch() {
+            this.leafletSwitch = !this.cesiumSwitch;
+            await this.$nextTick();
+            if (this.cesiumSwitch) {
+                this.setupCesium();
+            } else {
+                this.viewer.destroy();
+            }
         },
     },
     mounted() {
@@ -253,9 +279,11 @@ export default {
             return path;
         },
         setupLeaflet() {
+            console.log(1);
             this.leaflet.map = L.map("leafletMap").setView([0, 0], 1);
             const accessToken =
                 "pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw";
+            console.log(2);
             L.tileLayer(
                 `https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=${accessToken}`,
                 {
