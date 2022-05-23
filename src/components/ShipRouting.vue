@@ -72,24 +72,34 @@ export default {
     }),
     computed: {
         origin() {
-            if (!this.cesium.originMarker) return null;
-            const cartographic = Cesium.Cartographic.fromCartesian(
-                this.cesium.originMarker._position._value
-            );
-            return {
-                lat: Cesium.Math.toDegrees(cartographic.latitude),
-                lng: Cesium.Math.toDegrees(cartographic.longitude),
-            };
+            if (this.cesiumSwitch) {
+                if (!this.cesium.originMarker) return null;
+                const cartographic = Cesium.Cartographic.fromCartesian(
+                    this.cesium.originMarker._position._value
+                );
+                return {
+                    lat: Cesium.Math.toDegrees(cartographic.latitude),
+                    lng: Cesium.Math.toDegrees(cartographic.longitude),
+                };
+            } else if (this.leafletSwitch) {
+                return this.leaflet.originMarker._latlng;
+            }
+            return null;
         },
         destination() {
-            if (!this.cesium.destinationMarker) return null;
-            const cartographic = Cesium.Cartographic.fromCartesian(
-                this.cesium.destinationMarker._position._value
-            );
-            return {
-                lat: Cesium.Math.toDegrees(cartographic.latitude),
-                lng: Cesium.Math.toDegrees(cartographic.longitude),
-            };
+            if (this.cesiumSwitch) {
+                if (!this.cesium.destinationMarker) return null;
+                const cartographic = Cesium.Cartographic.fromCartesian(
+                    this.cesium.destinationMarker._position._value
+                );
+                return {
+                    lat: Cesium.Math.toDegrees(cartographic.latitude),
+                    lng: Cesium.Math.toDegrees(cartographic.longitude),
+                };
+            } else if (this.leafletSwitch) {
+                return this.leaflet.destinationMarker._latlng;
+            }
+            return null;
         },
     },
     watch: {
