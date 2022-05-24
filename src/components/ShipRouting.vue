@@ -492,5 +492,6 @@ export default {
 #leafletMap {
     width: 600px;
     height: 500px;
+    z-index: 0;
 }
 </style>
