@@ -1,7 +1,7 @@
 <template>
     <v-container>
         <v-row justify="end">
-            <v-col>
+            <v-col class="pt-0">
                 <div class="d-flex align-end flex-column">
                     <v-switch
                         v-model="leafletSwitch"
@@ -21,22 +21,28 @@
         <v-row justify="center">
             <div id="leafletMap" class="mb-2" v-if="leafletSwitch"></div>
         </v-row>
-        <div id="cesiumContainer" v-if="cesiumSwitch"></div>
-        <div>
-            <v-banner>
+        <v-row class="mb-1">
+            <div id="cesiumContainer" v-if="cesiumSwitch"></div>
+        </v-row>
+        <v-row class="py-1 mt-1">
+            <v-col cols="2">
                 <v-icon color="blue darken-2" small>mdi-map-marker</v-icon
                 >Origin:
-                {{ origin ? `${origin.lat}, ${origin.lng}` : "" }}
-            </v-banner>
-            <v-banner>
-                <v-icon color="red darken-2" small>mdi-map-marker</v-icon
-                >Destination:
-                {{
-                    destination ? `${destination.lat}, ${destination.lng}` : ""
-                }}
-            </v-banner>
-        </div>
-        <div class="pt-2">
+            </v-col>
+            <v-col cols="8">{{
+                origin ? `${origin.lat}, ${origin.lng}` : ""
+            }}</v-col>
+        </v-row>
+        <v-row class="pa-0 my-2">
+            <v-col cols="2"
+                ><v-icon color="red darken-2" small>mdi-map-marker</v-icon
+                >Destination:</v-col
+            >
+            <v-col cols="8">{{
+                destination ? `${destination.lat}, ${destination.lng}` : ""
+            }}</v-col>
+        </v-row>
+        <div class="mt-2">
             <v-btn
                 color="primary"
                 block
@@ -428,7 +434,7 @@ export default {
             return path;
         },
         setupLeaflet() {
-            this.leaflet.map = L.map("leafletMap").setView([0, 0], 1);
+            this.leaflet.map = L.map("leafletMap").setView([0, 0], 2);
             const accessToken =
                 "pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw";
             L.tileLayer(
@@ -436,8 +442,8 @@ export default {
                 {
                     maxZoom: 18,
                     attribution:
-                        'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, ' +
-                        'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+                        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>, ' +
+                        '&copy; <a href="https://www.mapbox.com/">Mapbox</a>',
                     id: "mapbox/streets-v11",
                     tileSize: 512,
                     zoomOffset: -1,
@@ -494,8 +500,13 @@ export default {
 
 <style scoped>
 #leafletMap {
-    width: 600px;
-    height: 500px;
+    width: 100%;
+    height: 560px;
     z-index: 0;
+}
+
+#cesiumContainer {
+    width: 100%;
+    height: 560px;
 }
 </style>
