@@ -19,7 +19,7 @@
             </v-col>
         </v-row>
         <v-row justify="center">
-            <div id="leafletMap" v-if="leafletSwitch"></div>
+            <div id="leafletMap" class="mb-2" v-if="leafletSwitch"></div>
         </v-row>
         <div id="cesiumContainer" v-if="cesiumSwitch"></div>
         <div>
