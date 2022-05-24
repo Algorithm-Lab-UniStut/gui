@@ -1,10 +1,14 @@
 <template>
     <v-container>
-        <div>
-            <v-switch v-model="leafletSwitch" label="Leaflet"></v-switch>
-            <v-switch v-model="cesiumSwitch" label="Cesium"></v-switch>
-        </div>
-        <div id="leafletMap" v-if="leafletSwitch"></div>
+        <v-row justify="end">
+            <div>
+                <v-switch v-model="leafletSwitch" label="Leaflet"></v-switch>
+                <v-switch v-model="cesiumSwitch" label="Cesium"></v-switch>
+            </div>
+        </v-row>
+        <v-row justify="center">
+            <div id="leafletMap" v-if="leafletSwitch"></div>
+        </v-row>
         <div id="cesiumContainer" v-if="cesiumSwitch"></div>
         <div>
             <v-banner>
