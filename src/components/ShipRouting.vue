@@ -1,10 +1,18 @@
 <template>
     <v-container>
         <v-row justify="end">
-            <div>
-                <v-switch v-model="leafletSwitch" label="Leaflet"></v-switch>
-                <v-switch v-model="cesiumSwitch" label="Cesium"></v-switch>
-            </div>
+            <v-col cols="12" sm="2" md="2">
+                <v-switch
+                    v-model="leafletSwitch"
+                    label="Leaflet"
+                    hide-details
+                ></v-switch>
+                <v-switch
+                    v-model="cesiumSwitch"
+                    label="Cesium"
+                    hide-details
+                ></v-switch>
+            </v-col>
         </v-row>
         <v-row justify="center">
             <div id="leafletMap" v-if="leafletSwitch"></div>
@@ -484,9 +492,5 @@ export default {
 #leafletMap {
     width: 600px;
     height: 500px;
-}
-
-.v-progress-circular {
-    margin: 1rem;
 }
 </style>
