@@ -1,17 +1,21 @@
 <template>
     <v-container>
         <v-row justify="end">
-            <v-col cols="12" sm="2" md="2">
-                <v-switch
-                    v-model="leafletSwitch"
-                    label="Leaflet"
-                    hide-details
-                ></v-switch>
-                <v-switch
-                    v-model="cesiumSwitch"
-                    label="Cesium"
-                    hide-details
-                ></v-switch>
+            <v-col>
+                <div class="d-flex align-end flex-column">
+                    <v-switch
+                        v-model="leafletSwitch"
+                        label="Leaflet"
+                        hide-details
+                        class="float-right"
+                    ></v-switch>
+                    <v-switch
+                        v-model="cesiumSwitch"
+                        label="Cesium"
+                        hide-details
+                        class="float-right"
+                    ></v-switch>
+                </div>
             </v-col>
         </v-row>
         <v-row justify="center">
