@@ -24,20 +24,16 @@
                 }}
             </v-banner>
         </div>
-        <div>
+        <div class="pt-2">
             <v-btn
-                :color="navigating ? 'light-grey' : 'primary'"
+                color="primary"
                 block
                 id="navigateBtn"
                 :disabled="navigating || !origin || !destination"
+                :loading="navigating"
                 @click="computeRoute"
             >
-                <v-progress-circular
-                    v-if="navigating"
-                    indeterminate
-                    color="grey"
-                ></v-progress-circular>
-                <div v-else>Navigate</div>
+                Navigate
             </v-btn>
             <v-banner class="pa-2 my-4" v-if="path.length">
                 Length: {{ path.length / 1000 }} km</v-banner
