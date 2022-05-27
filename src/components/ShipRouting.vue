@@ -230,8 +230,10 @@ export default {
             this.path.waypoints = [];
             this.path.length = 0;
             try {
+                const backend = process.env.VUE_APP_BACKEND_URL;
+                const port = process.env.VUE_APP_BACKEND_PORT;
                 const { data } = await axios.post(
-                    "http://localhost:8081/routes",
+                    `${backend}:${port}/routes`,
                     JSON.stringify({
                         origin: { lon: this.origin.lng, lat: this.origin.lat },
                         destination: {
