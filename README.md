@@ -5,11 +5,11 @@ You also need the [backend of the OSM-Ship Routing Service](https://github.com/d
 
 ## Setup Using Docker
 
-1. Pull the image from [Dockerhub](): `docker pull TODO:<TAG>`
-2. Start a container: `docker run -p 8080:8080 --name osm-gui TODO`
+1. Pull the image from [Dockerhub](https://hub.docker.com/repository/docker/natevvv/osm-ship-routing-gui): `docker pull natevvv/osm-ship-routing-gui:<TAG>`
+2. Start a container: `docker run -p 8080:8080 --name osm-gui natevvv/osm-ship-routing-gui`
 3. Access the GUI via a webbrowser: http://localhost:8080
 
-Note that `<TAG>` needs to be replaced by a valid tag. Please find all available tags on [Dockerhub]().
+Note that `<TAG>` needs to be replaced by a valid tag. Please find all available tags on [Dockerhub](https://hub.docker.com/repository/docker/natevvv/osm-ship-routing-gui/tags?page=1&ordering=last_updated).
 Tag `1.0.0` refers to the first submission and tag `latest` referst to the most recent release on Dockerhub.
 
 ## Project setup / Installation from source
