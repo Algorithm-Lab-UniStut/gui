@@ -529,7 +529,7 @@ export default {
                 latlng
             );
         },
-        drawLeafletLine(path, waypoints, color = "red") {
+        drawLeafletLine(path, waypoints, color = "green") {
             path?.remove();
             path = new L.Polyline(waypoints, {
                 color,
