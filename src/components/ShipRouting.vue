@@ -297,6 +297,7 @@ export default {
                     this.path.length = data.path.length;
                 }
             } catch (e) {
+                this.path.reachable = false;
                 console.error(e);
             } finally {
                 const waypointsDegreesArray = this.path.waypoints
