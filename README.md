@@ -17,7 +17,7 @@ The `osm-ship-routing-gui` is written in [Node.js](https://nodejs.org/en/), usin
 To install this version, you can use [nvm](https://github.com/nvm-sh/nvm).\
 Additionally, this project uses [Vue.js](https://vuejs.org/guide/quick-start.html#with-build-tools), [Vuetify](https://vuetifyjs.com/en/getting-started/installation/) (and [vue-cli](https://cli.vuejs.org/guide/installation.html))
 
-To install the components, run: 
+### Install project
 ```
 npm install
 ```
