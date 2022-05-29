@@ -53,8 +53,12 @@
             >
                 Navigate
             </v-btn>
-            <v-banner class="pa-2 my-4" v-if="path.length">
-                Length: {{ path.length / 1000 }} km</v-banner
+            <v-banner class="pa-2 my-4" v-if="path.waypoints && !navigating">
+                {{
+                    path.reachable
+                        ? "Length: " + path.length / 1000 + "km"
+                        : "Not reachable"
+                }}</v-banner
             >
         </div>
     </v-container>
@@ -68,7 +72,7 @@ import axios from "axios";
 export default {
     name: "ShipRouting",
     data: () => ({
-        path: { waypoints: null, length: 0 },
+        path: { waypoints: null, length: 0, reachable: true },
         navigating: false,
         cesiumSwitch: true,
         leafletSwitch: false,
@@ -243,6 +247,7 @@ export default {
                     })
                 );
                 console.log(data);
+                this.path.reachable = data.reachable;
                 if (data.reachable) {
                     this.path.waypoints = data.path.waypoints;
                     this.path.length = data.path.length;
