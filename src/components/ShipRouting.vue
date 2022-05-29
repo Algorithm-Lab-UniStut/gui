@@ -24,23 +24,45 @@
         <v-row class="mb-1">
             <div id="cesiumContainer" v-if="cesiumSwitch"></div>
         </v-row>
-        <v-row class="py-1 mt-1">
+        <v-row class="py-1 mt-1" align="center">
             <v-col cols="2">
                 <v-icon color="blue darken-2" small>mdi-map-marker</v-icon
                 >Origin:
             </v-col>
-            <v-col cols="8">{{
-                origin ? `${origin.lat}, ${origin.lng}` : ""
-            }}</v-col>
+            <v-col cols="4">
+                <v-text-field
+                    label="Latitude"
+                    v-model="originInput.lat"
+                    readonly
+                ></v-text-field
+            ></v-col>
+            <v-col cols="4">
+                <v-text-field
+                    label="Longitude"
+                    v-model="originInput.lng"
+                    readonly
+                ></v-text-field>
+            </v-col>
         </v-row>
-        <v-row class="pa-0 my-2">
+        <v-row class="pa-0 my-2" align="center">
             <v-col cols="2"
                 ><v-icon color="red darken-2" small>mdi-map-marker</v-icon
                 >Destination:</v-col
             >
-            <v-col cols="8">{{
-                destination ? `${destination.lat}, ${destination.lng}` : ""
-            }}</v-col>
+            <v-col cols="4">
+                <v-text-field
+                    label="Latitude"
+                    v-model="destinationInput.lat"
+                    readonly
+                ></v-text-field
+            ></v-col>
+            <v-col cols="4">
+                <v-text-field
+                    label="Longitude"
+                    v-model="destinationInput.lng"
+                    readonly
+                ></v-text-field>
+            </v-col>
         </v-row>
         <div class="mt-2">
             <v-btn
@@ -76,6 +98,8 @@ export default {
         navigating: false,
         cesiumSwitch: true,
         leafletSwitch: false,
+        originInput: { lat: null, lng: null },
+        destinationInput: { lat: null, lng: null },
         leaflet: {
             map: null,
             originMarker: L.marker(),
@@ -221,6 +245,26 @@ export default {
                 );
             } else {
                 this.teardownCesium();
+            }
+        },
+        origin() {
+            if (this.origin) {
+                if (this.origin.lat) this.originInput.lat = this.origin.lat;
+                if (this.origin.lng) this.originInput.lng = this.origin.lng;
+            } else {
+                this.originInput.lat = null;
+                this.originInput.lng = null;
+            }
+        },
+        destination() {
+            if (this.destination) {
+                if (this.destination.lat)
+                    this.destinationInput.lat = this.destination.lat;
+                if (this.destination.lng)
+                    this.destinationInput.lng = this.destination.lng;
+            } else {
+                this.destinationInput.lat = null;
+                this.destinationInput.lng = null;
             }
         },
     },
