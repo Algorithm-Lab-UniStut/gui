@@ -12,7 +12,7 @@ If the `origin` and `destination` is selected, you can click on the `Navigate` b
 
 ### Note
 
--   The Mediterranian Sea is not connected to the ocean, therefore no route is available between two locations there.
+-   The Mediterranean may not be connected to the ocean, so there is no route between two places there.
 -   You can switch between Leaflet and Cesium as map provider.
 -   Sometimes, Cesium lags a bit. Then the computed routes or the earth need some time to render.
 -   If possible, a red line displays the direct connection (using Great Circle) and a green line display a rhumb line between the origin and destination.
