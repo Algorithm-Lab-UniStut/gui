@@ -45,8 +45,6 @@
                     readonly
                 ></v-text-field>
             </v-col>
-        </v-row>
-        <v-row class="pa-0 my-2" align="center">
             <v-col cols="2"
                 ><v-icon color="red darken-2" small>mdi-map-marker</v-icon
                 >Destination:</v-col
