@@ -29,17 +29,19 @@
                 <v-icon color="blue darken-2" small>mdi-map-marker</v-icon
                 >Origin:
             </v-col>
-            <v-col cols="4">
+            <v-col cols="2">
                 <v-text-field
                     label="Latitude"
                     v-model="originInput.lat"
+                    suffix="°"
                     readonly
                 ></v-text-field
             ></v-col>
-            <v-col cols="4">
+            <v-col cols="2">
                 <v-text-field
                     label="Longitude"
                     v-model="originInput.lng"
+                    suffix="°"
                     readonly
                 ></v-text-field>
             </v-col>
@@ -49,17 +51,19 @@
                 ><v-icon color="red darken-2" small>mdi-map-marker</v-icon
                 >Destination:</v-col
             >
-            <v-col cols="4">
+            <v-col cols="2">
                 <v-text-field
                     label="Latitude"
                     v-model="destinationInput.lat"
+                    suffix="°"
                     readonly
                 ></v-text-field
             ></v-col>
-            <v-col cols="4">
+            <v-col cols="2">
                 <v-text-field
                     label="Longitude"
                     v-model="destinationInput.lng"
+                    suffix="°"
                     readonly
                 ></v-text-field>
             </v-col>
