@@ -25,7 +25,7 @@ If the `origin` and `destination` is selected, you can click on the `Navigate` b
 3. Access the GUI via a webbrowser: http://localhost:8080
 
 Note that `<TAG>` needs to be replaced by a valid tag. Please find all available tags on [Dockerhub](https://hub.docker.com/repository/docker/natevvv/osm-ship-routing-gui/tags?page=1&ordering=last_updated).
-Tag `1.0.0` refers to the first submission and tag `latest` referst to the most recent release on Dockerhub.
+Tag `1.0.2` refers to the first submission and tag `latest` refers to the most recent release on Dockerhub.
 
 ## Project setup / Installation from source
 
