@@ -146,6 +146,7 @@ export default {
             destinationMarker: L.marker(),
             directPath: null,
             path: null,
+            pathVerticeMarker: null,
             graphVerticeMarker: null,
             searchSpaceVerticeMarker: null,
             verticeRenderer: L.canvas({ padding: 0.5 }),
@@ -157,6 +158,7 @@ export default {
             greatCircleLine: null,
             rhumbLine: null,
             path: null,
+            pathVerticeMarker: null,
             graphVerticeMarker: null,
             searchSpaceVerticeMarker: null,
         },
@@ -377,6 +379,13 @@ export default {
                         Cesium.Color.RED,
                         3
                     );
+
+                    this.cesiumHidePathNodes()
+                    this.cesiumShowPathNodes(
+                        this.path.waypoints.map((w) => {
+                            return { lat: w.lat, lon: w.lon };
+                        })
+                    );
                 }
                 if (this.leafletSwitch) {
                     this.leaflet.directPath = this.drawLeafletLine(
@@ -389,6 +398,12 @@ export default {
                             return { lat: w.lat, lng: w.lon };
                         }),
                         "white"
+                    );
+                    this.leafletHidePathNodes()
+                    this.leafletShowPathNodes(
+                        this.path.waypoints.map((w) => {
+                            return { lat: w.lat, lon: w.lon };
+                        })
                     );
                 }
                 this.navigating = false;
@@ -685,6 +700,29 @@ export default {
                 );
             this.cesium.graphVerticeMarker = null;
         },
+        cesiumShowPathNodes(vertices) {
+            try {
+                this.cesium.pathVerticeMarker =
+                    this.cesium.viewer.scene.primitives.add(
+                        new Cesium.PointPrimitiveCollection()
+                    );
+                vertices.forEach((v) =>
+                    this.cesium.pathVerticeMarker.add({
+                        position: Cesium.Cartesian3.fromDegrees(v.lon, v.lat),
+                        color: Cesium.Color.GREEN,
+                    })
+                );
+            } catch (e) {
+                console.error(e);
+            }
+        },
+        cesiumHidePathNodes() {
+            if (this.cesium.pathVerticeMarker)
+                this.cesium.viewer.scene.primitives.remove(
+                    this.cesium.pathVerticeMarker
+                );
+            this.cesium.pathVerticeMarker = null;
+        },
         leafletShowGraphNodes(vertices) {
             try {
                 let vtx = vertices.map((v) =>
@@ -704,6 +742,26 @@ export default {
             if (this.leaflet.graphVerticeMarker)
                 this.leaflet.graphVerticeMarker.remove();
             this.leaflet.graphVerticeMarker = null;
+        },
+        leafletShowPathNodes(vertices) {
+            try {
+                let vtx = vertices.map((v) =>
+                    L.circleMarker([v.lat, v.lon], {
+                        renderer: this.leaflet.verticeRenderer,
+                        color: "#0f3",
+                        radius: 1,
+                    })
+                );
+                this.leaflet.pathVerticeMarker = L.layerGroup(vtx);
+                this.leaflet.pathVerticeMarker.addTo(this.leaflet.map);
+            } catch (e) {
+                console.error(e);
+            }
+        },
+        leafletHidePathNodes() {
+            if (this.leaflet.pathVerticeMarker)
+                this.leaflet.pathVerticeMarker.remove();
+            this.leaflet.pathVerticeMarker = null;
         },
         cesiumShowSearchSpace(vertices) {
             try {
