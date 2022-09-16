@@ -20,6 +20,8 @@ If the `origin` and `destination` is selected, you can click on the `Navigate` b
 
 ## Setup Using Docker
 
+**Currently outdated, since only building for Mac was possible. I will hopefully fix this later.**
+
 1. Pull the image from [Dockerhub](https://hub.docker.com/repository/docker/natevvv/osm-ship-routing-gui): `docker pull natevvv/osm-ship-routing-gui:<TAG>`
 2. Start a container: `docker run -p 8080:8080 --name osm-gui natevvv/osm-ship-routing-gui`
 3. Access the GUI via a webbrowser: http://localhost:8080
