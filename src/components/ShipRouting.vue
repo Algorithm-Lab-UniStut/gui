@@ -235,6 +235,19 @@ export default {
                         "white"
                     );
                 }
+
+                if (this.graph.showVertices)
+                    this.leafletShowGraphNodes(this.graph.vertices);
+
+                if (this.path.waypoints != null)
+                    this.leafletShowPathNodes(
+                        this.path.waypoints.map((w) => {
+                            return { lat: w.lat, lon: w.lon };
+                        })
+                    );
+
+                if (this.graph.showSearchSpace)
+                    this.leafletShowSearchSpace(this.graph.searchSpace);
             } else {
                 this.teardownLeaflet();
             }
@@ -290,6 +303,19 @@ export default {
                     Cesium.Color.RED,
                     3
                 );
+
+                if (this.graph.showVertices)
+                    this.cesiumShowGraphNodes(this.graph.vertices);
+
+                if (this.path.waypoints != null)
+                    this.cesiumShowPathNodes(
+                        this.path.waypoints.map((w) => {
+                            return { lat: w.lat, lon: w.lon };
+                        })
+                    );
+
+                if (this.graph.showSearchSpace)
+                    this.cesiumShowSearchSpace(this.graph.searchSpace);
             } else {
                 this.teardownCesium();
             }
@@ -380,7 +406,7 @@ export default {
                         3
                     );
 
-                    this.cesiumHidePathNodes()
+                    this.cesiumHidePathNodes();
                     this.cesiumShowPathNodes(
                         this.path.waypoints.map((w) => {
                             return { lat: w.lat, lon: w.lon };
@@ -399,7 +425,7 @@ export default {
                         }),
                         "white"
                     );
-                    this.leafletHidePathNodes()
+                    this.leafletHidePathNodes();
                     this.leafletShowPathNodes(
                         this.path.waypoints.map((w) => {
                             return { lat: w.lat, lon: w.lon };
@@ -687,6 +713,7 @@ export default {
                     this.cesium.graphVerticeMarker.add({
                         position: Cesium.Cartesian3.fromDegrees(v.lon, v.lat),
                         color: Cesium.Color.RED,
+                        pixelSize: 3,
                     })
                 );
             } catch (e) {
@@ -710,6 +737,7 @@ export default {
                     this.cesium.pathVerticeMarker.add({
                         position: Cesium.Cartesian3.fromDegrees(v.lon, v.lat),
                         color: Cesium.Color.GREEN,
+                        pixelSize: 3,
                     })
                 );
             } catch (e) {
